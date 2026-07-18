@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KisanDirect — Farmer to Buyer Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF8EA;
+    --crate:#C68347;
+    --crate-dark:#8C5A28;
+    --ink:#241A10;
+    --leaf:#2E8B4F;
+    --leaf-dark:#1E6136;
+    --leaf-pale:#E4F3E3;
+    --tomato:#E6532E;
+    --tomato-pale:#FBE2D8;
+    --mango:#F5A63B;
+    --mango-pale:#FDECD1;
+    --muted:#7C6F5B;
+    --line:#EADFC7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.55;
+  }
+  h1,h2,h3{
+    font-family:'Baloo 2',sans-serif;
+    color:var(--ink);
+    line-height:1.12;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  ::selection{background:var(--mango);color:var(--ink);}
+  img,svg{display:block;max-width:100%;}
+
+  .skip-link{
+    position:absolute;left:-999px;top:0;background:var(--mango);color:var(--ink);
+    padding:10px 16px;z-index:100;font-weight:700;border-radius:0 0 8px 0;
+  }
+  .skip-link:focus{left:0;top:0;}
+
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--tomato);
+    outline-offset:2px;
+  }
+
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* soft blob background accents */
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(2px);
+    opacity:0.5;
+    z-index:0;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:var(--paper);
+    border-bottom:3px dashed var(--crate);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-top:14px; padding-bottom:14px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    font-family:'Baloo 2',sans-serif; font-weight:800;
+    color:var(--ink); font-size:1.35rem;
+    text-decoration:none;
+  }
+  .brand .emoji{ display:inline-block; transform:rotate(-8deg); font-size:1.4rem; }
+  .navlinks{display:flex; gap:8px; list-style:none;}
+  .navlinks a{
+    color:var(--ink); text-decoration:none; font-size:0.92rem; font-weight:600;
+    padding:8px 14px; border-radius:999px; transition:background 0.15s, transform 0.15s;
+  }
+  .navlinks a:hover{ background:var(--leaf-pale); transform:translateY(-1px); }
+  @media(max-width:760px){ .navlinks{display:none;} }
+
+  /* ---------- BUTTONS (sticker style) ---------- */
+  .btn{
+    display:inline-block;
+    padding:14px 26px;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    border-radius:14px;
+    text-decoration:none;
+    cursor:pointer;
+    border:2.5px solid var(--ink);
+    box-shadow:4px 4px 0 var(--ink);
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink); }
+  .btn:active{ transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink); }
+  .btn-primary{ background:var(--mango); color:var(--ink); }
+  .btn-ghost{ background:var(--paper); color:var(--ink); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:76px 0 90px;
+  }
+  .hero .blob-a{ width:340px;height:340px; background:var(--leaf-pale); top:-120px; right:-80px; }
+  .hero .blob-b{ width:220px;height:220px; background:var(--mango-pale); bottom:-80px; left:-60px; }
+  .hero-inner{ position:relative; z-index:1; }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    background:var(--ink);
+    color:var(--paper);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    font-size:0.74rem;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{ content:"🌱"; }
+  .hero h1{
+    font-size:clamp(2.3rem, 5.6vw, 3.7rem);
+    max-width:780px;
+    font-weight:800;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--leaf-dark);
+    text-decoration:underline;
+    text-decoration-color:var(--mango);
+    text-decoration-thickness:6px;
+    text-underline-offset:6px;
+  }
+  .hero p.lede{
+    max-width:540px;
+    margin-top:22px;
+    font-size:1.1rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .hero-cta{
+    margin-top:32px;
+    display:flex; gap:16px; flex-wrap:wrap;
+  }
+
+  /* ---------- SECTION HEAD ---------- */
+  .section-head{
+    max-width:640px;
+    margin-bottom:40px;
+  }
+  .section-head .tag{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--tomato);
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    display:inline-block;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .section-head h2{
+    font-size:clamp(1.7rem,3.6vw,2.35rem);
+  }
+  .section-head p{
+    margin-top:12px;
+    color:var(--muted);
+    font-size:1.03rem;
+  }
+  .light-on-dark .section-head p{ color:#CFE7D3; }
+  .light-on-dark .section-head h2{ color:var(--paper); }
+  .light-on-dark .section-head .tag{ color:var(--mango); }
+
+  /* ---------- PROBLEM ---------- */
+  .problem{ padding:80px 0 30px; }
+  .problem-list{
+    list-style:none;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 24px;
+  }
+  @media(max-width:720px){ .problem-list{ grid-template-columns:1fr; } }
+  .problem-list li{
+    display:flex; gap:12px; align-items:flex-start;
+    font-size:0.98rem;
+    font-weight:500;
+    background:#fff;
+    border:2px solid var(--ink);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .problem-list li::before{
+    content:"🍅";
+    flex:none;
+  }
+
+  /* ---------- PRICE BOARD (signature element) ---------- */
+  .board-section{ padding:90px 0 96px; position:relative; }
+  .board{
+    background:
+      repeating-linear-gradient(90deg, var(--crate) 0 34px, var(--crate-dark) 34px 38px);
+    border-radius:18px;
+    padding:6px;
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .board-inner{
+    background:var(--paper);
+    border-radius:14px;
+    padding:34px 30px;
+    position:relative;
+  }
+  .board-toggle{
+    display:flex; gap:10px; margin-bottom:26px; flex-wrap:wrap;
+  }
+  .toggle-btn{
+    font-family:'Baloo 2',sans-serif;
+    font-size:0.9rem;
+    font-weight:700;
+    padding:9px 18px;
+    border-radius:999px;
+    border:2px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .toggle-btn.active{
+    background:var(--leaf);
+    border-color:var(--ink);
+    color:#fff;
+  }
+
+  .path-row{
+    display:flex;
+    align-items:center;
+    gap:0;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .node{
+    text-align:center;
+    min-width:104px;
+  }
+  .node .label{
+    font-size:0.72rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:6px;
+    font-weight:700;
+  }
+  .node .amt{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:1.1rem;
+    background:var(--mango-pale);
+    border:2px solid var(--ink);
+    border-radius:8px;
+    padding:4px 8px;
+    display:inline-block;
+    color:var(--ink);
+  }
+  .arrow{
+    flex:1;
+    min-width:26px;
+    height:3px;
+    background:repeating-linear-gradient(to right, var(--ink) 0 6px, transparent 6px 11px);
+    position:relative;
+    margin:0 4px;
+  }
+  .arrow::after{
+    content:"";
+    position:absolute; right:-2px; top:50%;
+    width:8px;height:8px;
+    border-right:3px solid var(--ink);
+    border-top:3px solid var(--ink);
+    transform:translateY(-50%) rotate(45deg);
+  }
+
+  .stamp{
+    position:absolute;
+    top:-14px; right:24px;
+    background:var(--tomato);
+    color:#fff;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:0.8rem;
+    padding:8px 16px;
+    border-radius:999px;
+    border:2.5px solid var(--ink);
+    transform:rotate(4deg);
+  }
+  @media(max-width:640px){ .stamp{ position:static; display:inline-block; transform:rotate(-2deg); margin-bottom:16px;} }
+
+  .board-foot{
+    border-top:2px dashed var(--crate);
+    padding-top:18px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-size:0.92rem; color:var(--muted); font-weight:600;
+  }
+  .board-foot strong{ color:var(--leaf-dark); }
+
+  /* ---------- FEATURES (sticky-note grid) ---------- */
+  .features{
+    background:var(--ink);
+    padding:90px 0 96px;
+    color:var(--paper);
+  }
+  .feat-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+  @media(max-width:860px){ .feat-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:560px){ .feat-grid{ grid-template-columns:1fr; } }
+  .feat-card{
+    border-radius:14px;
+    padding:24px 22px;
+    border:2.5px solid var(--ink);
+    transform:rotate(var(--tilt,-1deg));
+    transition:transform 0.15s ease;
+  }
+  .feat-card:hover{ transform:rotate(0deg) translateY(-3px); }
+  .feat-card:nth-child(6n+1){ background:var(--mango-pale); --tilt:-1.5deg; }
+  .feat-card:nth-child(6n+2){ background:var(--leaf-pale); --tilt:1deg; }
+  .feat-card:nth-child(6n+3){ background:var(--tomato-pale); --tilt:-0.6deg; }
+  .feat-card:nth-child(6n+4){ background:var(--leaf-pale); --tilt:1.4deg; }
+  .feat-card:nth-child(6n+5){ background:var(--tomato-pale); --tilt:-1deg; }
+  .feat-card:nth-child(6n+6){ background:var(--mango-pale); --tilt:0.8deg; }
+  .feat-card .num{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--muted);
+    font-size:0.78rem;
+    font-weight:600;
+    display:block;
+    margin-bottom:10px;
+  }
+  .feat-card h3{
+    color:var(--ink);
+    font-size:1.12rem;
+    margin-bottom:8px;
+  }
+  .feat-card p{
+    color:#443622;
+    font-size:0.94rem;
+  }
+
+  /* ---------- USERS ---------- */
+  .users{ padding:90px 0 96px; }
+  .user-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  @media(max-width:720px){ .user-grid{ grid-template-columns:1fr; } }
+  .user-card{
+    border:2.5px solid var(--ink);
+    border-radius:18px;
+    padding:30px 28px;
+    box-shadow:5px 5px 0 var(--ink);
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .user-card:hover{ transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--ink); }
+  .user-card.farmer{ background:var(--leaf-pale); }
+  .user-card.buyer{ background:var(--mango-pale); }
+  .user-card h3{ font-size:1.3rem; margin-bottom:14px; }
+  .user-card ul{ margin:0; padding-left:2px; list-style:none; font-size:0.95rem; font-weight:500; }
+  .user-card li{ margin-bottom:10px; padding-left:24px; position:relative; }
+  .user-card li::before{ content:"✓"; position:absolute; left:0; color:var(--leaf-dark); font-weight:800; }
+  .user-card.buyer li::before{ color:var(--tomato); }
+
+  /* ---------- MARKET RATES (chalkboard) ---------- */
+  .rates-section{
+    background:var(--leaf-dark);
+    padding:90px 0 96px;
+    color:var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03) 0, transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.03) 0, transparent 45%);
+  }
+  .rate-updated{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.8rem;
+    color:#CFE7D3;
+    margin-bottom:24px;
+    display:block;
+  }
+  .rate-tabs{
+    display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;
+  }
+  .rate-tabs .toggle-btn{
+    background:transparent;
+    border-color:#CFE7D3;
+    color:#fff;
+  }
+  .rate-tabs .toggle-btn.active{
+    background:var(--mango);
+    border-color:var(--paper);
+    color:var(--ink);
+  }
+  .rate-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+  }
+  @media(max-width:860px){ .rate-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:480px){ .rate-grid{ grid-template-columns:1fr; } }
+  .rate-card{
+    background:rgba(255,255,255,0.06);
+    border:2px dashed #CFE7D3;
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .rate-card .rname{
+    font-size:0.94rem;
+    font-weight:700;
+    color:#fff;
+  }
+  .rate-card .runit{
+    display:block;
+    font-size:0.72rem;
+    color:#B9D9BC;
+    font-weight:500;
+    margin-top:2px;
+  }
+  .rate-card .rprice{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--mango);
+    font-size:1.02rem;
+    white-space:nowrap;
+  }
+
+  /* ---------- CTA / FOOTER ---------- */
+  .cta{
+    background:var(--tomato);
+    padding:70px 0;
+    text-align:center;
+    color:#fff;
+  }
+  .cta h2{ font-size:clamp(1.6rem,3.6vw,2.2rem); color:#fff; }
+  .cta p{ margin-top:12px; color:#FDE3D9; font-weight:500; }
+  .cta .btn-primary{ margin-top:26px; background:#fff; color:var(--ink); }
+
+  footer{
+    background:var(--ink);
+    color:#B8AA92;
+    padding:32px 0;
+    font-size:0.85rem;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<nav>
+  <div class="wrap">
+    <a href="#" class="brand"><span class="emoji">🥕</span>KisanDirect</a>
+    <ul class="navlinks">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#solution">Solution</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#users">Who it's for</a></li>
+      <li><a href="#rates">Market Rates</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <div class="wrap hero-inner">
+      <span class="eyebrow">Farmer-to-Buyer Marketplace</span>
+      <h1>Cut out the middleman. <em>Not the farmer.</em></h1>
+      <p class="lede">A direct trading platform where farmers list crops at their own price, and buyers purchase straight from the source — transparent, fair, and reliable.</p>
+      <div class="hero-cta">
+        <a href="#solution" class="btn btn-primary">See how it works</a>
+        <a href="#problem" class="btn btn-ghost">The problem today</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM RECAP -->
+  <section class="problem wrap" id="problem">
+    <div class="section-head">
+      <span class="tag">Problem Statement</span>
+      <h2>The current mandi chain isn't working for farmers</h2>
+      <p>Most crops still move through several intermediaries before reaching a buyer — and value leaks out at every stop.</p>
+    </div>
+    <ul class="problem-list">
+      <li>Farmers often receive low prices for their produce.</li>
+      <li>Middlemen take a significant share of the profit.</li>
+      <li>Buyers end up paying higher prices than they should.</li>
+      <li>Farmers struggle to find reliable, repeat buyers.</li>
+      <li>Price information is not transparent across the chain.</li>
+    </ul>
+  </section>
+
+  <!-- SIGNATURE ELEMENT: PRICE BOARD -->
+  <section class="board-section wrap" id="solution">
+    <div class="section-head">
+      <span class="tag">Solution</span>
+      <h2>Same crop, two different journeys</h2>
+      <p>Toggle between the old route and KisanDirect to see where the money actually goes.</p>
+    </div>
+
+    <div class="board">
+      <div class="board-inner">
+        <div class="stamp" id="stampText">40% Lost in Transit</div>
+        <div class="board-toggle">
+          <button class="toggle-btn active" id="btnMiddleman" onclick="showPath('middleman')">Through Middlemen</button>
+          <button class="toggle-btn" id="btnDirect" onclick="showPath('direct')">Via KisanDirect</button>
+        </div>
+
+        <div class="path-row" id="pathRow">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="board-foot">
+          <span>Crop: <strong>Tomatoes, 100kg</strong></span>
+          <span id="farmerGets">Farmer receives: <strong class="mono">₹1,200</strong></span>
+          <span id="buyerPays">Buyer pays: <strong class="mono">₹2,000</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="wrap light-on-dark">
+      <div class="section-head">
+        <span class="tag">Core Features</span>
+        <h2>What the platform actually does</h2>
+        <p>Built around the five problems above — each feature closes one gap in the old system.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <span class="num">01</span>
+          <h3>Live crop listings</h3>
+          <p>Farmers post crop type, quantity, quality grade, and asking price directly — no agent required.</p>
+        </div>
+        <div class="feat-card">
+          <span class="num">02</span>
+          <h3>Transparent price board</h3>
+          <p>Real-time and historical prices by crop and region, so both sides know what's fair before they trade.</p>
+        </div>
+        <div class="feat-card">
+          <span class="num">03</span>
+          <h3>Direct messaging &amp; offers</h3>
+          <p>Buyers and farmers negotiate and confirm orders in-app, cutting out the back-and-forth through agents.</p>
+        </div>
+        <div class="feat-card">
+          <span class="num">04</span>
+          <h3>Verified ratings</h3>
+          <p>Both farmers and buyers build a trust score from past trades, so reliability replaces guesswork.</p>
+        </div>
+        <div class="feat-card">
+          <span class="num">05</span>
+          <h3>Logistics matching</h3>
+          <p>Connects confirmed orders with local transport options, so produce still reaches the buyer efficiently.</p>
+        </div>
+        <div class="feat-card">
+          <span class="num">06</span>
+          <h3>Secure payments</h3>
+          <p>Escrow-style payment release on delivery confirmation, protecting both farmer and buyer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section class="users wrap" id="users">
+    <div class="section-head">
+      <span class="tag">Who It's For</span>
+      <h2>Two sides, one fair marketplace</h2>
+    </div>
+    <div class="user-grid">
+      <div class="user-card farmer">
+        <h3>🌾 Farmers</h3>
+        <ul>
+          <li>Set their own asking price</li>
+          <li>Reach buyers beyond their local mandi</li>
+          <li>Get paid faster with fewer disputes</li>
+          <li>Build a reputation that brings repeat business</li>
+        </ul>
+      </div>
+      <div class="user-card buyer">
+        <h3>🛒 Buyers</h3>
+        <ul>
+          <li>Source produce closer to farm-gate price</li>
+          <li>Verify quality and seller history upfront</li>
+          <li>Order consistent quantities from trusted farmers</li>
+          <li>Track price trends before committing</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKET RATES -->
+  <section class="rates-section" id="rates">
+    <div class="wrap light-on-dark">
+      <div class="section-head">
+        <span class="tag">Live Market Rates</span>
+        <h2>Everything on the board — vegetables, fruits &amp; ingredients</h2>
+        <p>Sample listing of what's currently available on KisanDirect, straight from farm-gate, updated daily by sellers.</p>
+      </div>
+
+      <span class="rate-updated" id="rateUpdated">Last updated: today</span>
+
+      <div class="rate-tabs">
+        <button class="toggle-btn active" id="tabVeg" onclick="showRates('veg')">Vegetables</button>
+        <button class="toggle-btn" id="tabFruit" onclick="showRates('fruit')">Fruits</button>
+        <button class="toggle-btn" id="tabIngredient" onclick="showRates('ingredient')">Ingredients</button>
+      </div>
+
+      <div class="rate-grid" id="rateGrid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="wrap">
+      <h2>Fair prices start with a direct connection.</h2>
+      <p>This is a project concept demo — built to show how KisanDirect closes the gap between farm and market.</p>
+      <a href="#" class="btn btn-primary">View project overview</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>KisanDirect — Farmer-to-Buyer Marketplace Concept</span>
+    <span>Project Demo · Year 1</span>
+  </div>
+</footer>
+
+<script>
+  const paths = {
+    middleman: {
+      nodes: [
+        {label:"Farmer", amt:"₹1,200"},
+        {label:"Local Agent", amt:"₹1,500"},
+        {label:"Wholesaler", amt:"₹1,750"},
+        {label:"Retailer", amt:"₹2,000"},
+        {label:"Buyer", amt:"pays ₹2,000"}
+      ],
+      farmer:"₹1,200",
+      buyer:"₹2,000",
+      stamp:"40% Lost in Transit"
+    },
+    direct: {
+      nodes: [
+        {label:"Farmer", amt:"₹1,600"},
+        {label:"KisanDirect", amt:"platform fee"},
+        {label:"Buyer", amt:"pays ₹1,750"}
+      ],
+      farmer:"₹1,600",
+      buyer:"₹1,750",
+      stamp:"Only 8% Platform Fee"
+    }
+  };
+
+  function showPath(type){
+    const data = paths[type];
+    const row = document.getElementById('pathRow');
+    row.innerHTML = '';
+    data.nodes.forEach((n, i) => {
+      const node = document.createElement('div');
+      node.className = 'node';
+      node.innerHTML = `<div class="label">${n.label}</div><div class="amt mono">${n.amt}</div>`;
+      row.appendChild(node);
+      if(i < data.nodes.length - 1){
+        const arrow = document.createElement('div');
+        arrow.className = 'arrow';
+        row.appendChild(arrow);
+      }
+    });
+    document.getElementById('farmerGets').innerHTML = `Farmer receives: <strong class="mono">${data.farmer}</strong>`;
+    document.getElementById('buyerPays').innerHTML = `Buyer pays: <strong class="mono">${data.buyer}</strong>`;
+    document.getElementById('stampText').textContent = data.stamp;
+
+    document.getElementById('btnMiddleman').classList.toggle('active', type === 'middleman');
+    document.getElementById('btnDirect').classList.toggle('active', type === 'direct');
+  }
+
+  showPath('middleman');
+
+  const marketRates = {
+    veg: [
+      {name:"Tomato", price:"₹28"},
+      {name:"Onion", price:"₹24"},
+      {name:"Potato", price:"₹20"},
+      {name:"Cabbage", price:"₹18"},
+      {name:"Cauliflower", price:"₹30"},
+      {name:"Brinjal", price:"₹26"},
+      {name:"Carrot", price:"₹32"},
+      {name:"Green Peas", price:"₹45"},
+      {name:"Spinach", price:"₹22"},
+      {name:"Capsicum", price:"₹40"},
+      {name:"Cucumber", price:"₹18"},
+      {name:"Lady Finger (Bhindi)", price:"₹35"}
+    ],
+    fruit: [
+      {name:"Apple", price:"₹140"},
+      {name:"Banana", price:"₹50"},
+      {name:"Mango", price:"₹90"},
+      {name:"Grapes", price:"₹80"},
+      {name:"Orange", price:"₹60"},
+      {name:"Papaya", price:"₹35"},
+      {name:"Watermelon", price:"₹25"},
+      {name:"Pomegranate", price:"₹150"},
+      {name:"Guava", price:"₹45"},
+      {name:"Sweet Lime", price:"₹55"}
+    ],
+    ingredient: [
+      {name:"Wheat", price:"₹24"},
+      {name:"Rice (Basmati)", price:"₹65"},
+      {name:"Turmeric", price:"₹180"},
+      {name:"Ginger", price:"₹90"},
+      {name:"Garlic", price:"₹120"},
+      {name:"Green Chilli", price:"₹40"},
+      {name:"Coriander", price:"₹10", unit:"per bundle"},
+      {name:"Mustard Seeds", price:"₹95"}
+    ]
+  };
+
+  function showRates(type){
+    const grid = document.getElementById('rateGrid');
+    grid.innerHTML = '';
+    marketRates[type].forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'rate-card';
+      const unit = item.unit || 'per kg';
+      card.innerHTML = `<div><span class="rname">${item.name}</span><span class="runit">${unit}</span></div><span class="rprice mono">${item.price}</span>`;
+      grid.appendChild(card);
+    });
+    document.getElementById('tabVeg').classList.toggle('active', type === 'veg');
+    document.getElementById('tabFruit').classList.toggle('active', type === 'fruit');
+    document.getElementById('tabIngredient').classList.toggle('active', type === 'ingredient');
+  }
+
+  const today = new Date();
+  document.getElementById('rateUpdated').textContent = 'Last updated: ' + today.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+  showRates('veg');
+</script>
+
+</body>
+</html>
